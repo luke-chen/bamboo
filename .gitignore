@@ -1,0 +1,13 @@
+#package Files #
+*.jar
+*.war
+*.ear
+#Eclipse Files#
+*.pydevproject
+.project
+.metadata
+#local.properties
+.classpath
+.settings/
+
+target/
