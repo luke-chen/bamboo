@@ -163,14 +163,15 @@ public class Client extends Thread {
             	byte[] data = readOfBlock();
             	DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
             	short msgId = dis.readShort();
-            	
+            	long serverTime = dis.readLong();
+            	int off = 2+8;
             	ResponseMessage resp = new ResponseMessage();
             	resp.setId(msgId);
-				if (data.length > 2) {
-					byte[] b = new byte[data.length - 2];
+				if (data.length > off) {
+					byte[] b = new byte[data.length - off];
 					dis.readFully(b);
-					String json = new String(b, "utf-8");
-					resp.setData(JsonUtil.toObject(json));
+//					String json = new String(b, "utf-8");
+					resp.setData(JsonUtil.toObject(b, ResponseMessage.class));
 				}
             	 // 解析数据
                 parse.parse(resp);

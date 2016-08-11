@@ -4,6 +4,9 @@ public class MessageID {
 	public static final short RSP_UNKNOWN = 1;
 	public static final short RSP_TOKEN_INVALID = 0002;
 	
+	public static final short REQ_ECHO = 60;
+	public static final short RSP_ECHO = REQ_ECHO;
+	
 	// heart beat
 	public static final short REQ_HEART_BEAT = 80;
 	public static final short RSP_HEART_BEAT = REQ_HEART_BEAT;

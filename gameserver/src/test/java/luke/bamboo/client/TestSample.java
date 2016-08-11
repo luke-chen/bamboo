@@ -18,6 +18,7 @@ import luke.bamboo.common.util.RspCode;
 import luke.bamboo.message.RequestMessage;
 import luke.bamboo.message.ResponseMessage;
 import luke.bamboo.message.id.MessageID;
+import luke.bamboo.message.req.ReqEchoMsg;
 import luke.bamboo.message.resp.RspLoginMsg;
 
 public class TestSample extends Thread  implements ClientParse {
@@ -39,28 +40,35 @@ public class TestSample extends Thread  implements ClientParse {
 	public void run() {
 		try {
 			// 连接gate服务器
-			List<NameValuePair> params = new ArrayList<NameValuePair>();
-			params.add(new BasicNameValuePair("accountName", "a1b6c393-38ba-4e89-bf73-6037987a4e16"));
-//			params.add(new BasicNameValuePair("accountName", ""));
-			params.add(new BasicNameValuePair("password", "password"));
-			params.add(new BasicNameValuePair("randomName", "0"));
-			RspCode rspCode= new RspCode();
-			Success success = HttpClientUtils.fetchByPost("http://221.6.14.182:8011/wego-gate/loginAndRegister", params, Success.class, rspCode);
-			System.out.println("**登录gate成功**");
+//			List<NameValuePair> params = new ArrayList<NameValuePair>();
+//			params.add(new BasicNameValuePair("accountName", "a1b6c393-38ba-4e89-bf73-6037987a4e16"));
+////			params.add(new BasicNameValuePair("accountName", ""));
+//			params.add(new BasicNameValuePair("password", "password"));
+//			params.add(new BasicNameValuePair("randomName", "0"));
+//			RspCode rspCode= new RspCode();
+//			Success success = HttpClientUtils.fetchByPost("http://221.6.14.182:8011/wego-gate/loginAndRegister", params, Success.class, rspCode);
+//			System.out.println("**登录gate成功**");
+//			
+//			JSONObject account = (JSONObject)success.getData();
+//			String token = account.getString("token");
+//			JSONObject server = (JSONObject)account.get("gameServerInfo");
+//			String ip = server.getString("ip");
+//			int port = server.getInteger("port");
+//			
+//			Thread.sleep(5000);
+//			// 连接game服务器
+//	    	client = new Client(this);
+//			client.connection(5000, ip, port, 60*1000, true);
+//			sendLogin(token);
+//			for (int i=0; i<1; i++) {
+//				sendHeartBeat();
+//				Thread.sleep(30000);
+//			}
 			
-			JSONObject account = (JSONObject)success.getData();
-			String token = account.getString("token");
-			JSONObject server = (JSONObject)account.get("gameServerInfo");
-			String ip = server.getString("ip");
-			int port = server.getInteger("port");
-			
-			Thread.sleep(5000);
-			// 连接game服务器
-	    	client = new Client(this);
-			client.connection(5000, ip, port, 60*1000, true);
-			sendLogin(token);
-			for (int i=0; i<1; i++) {
-				sendHeartBeat();
+			client = new Client(this);
+			client.connection(5000, "127.0.0.1", 8610, 60*1000, true);
+			for (int i=0; i<2; i++) {
+				sendEcho();
 				Thread.sleep(30000);
 			}
 		} catch (Exception e) {
@@ -105,6 +113,9 @@ public class TestSample extends Thread  implements ClientParse {
 		 System.out.println("parse msgID="+msgID+ " t:"+new Date(t*1000)+ "t:"+t);
 
 		switch(msgID) {
+			case MessageID.RSP_ECHO:
+				System.out.println("echo");
+				break;
 			case MessageID.RSP_LOGIN_OK:
 				System.out.println("login ok");
 				break;
@@ -156,7 +167,15 @@ public class TestSample extends Thread  implements ClientParse {
 //        net.packageIt();
 //        net.flush();
 //    }
-    
+    public void sendEcho() throws IOException {
+    	System.out.println("sendEcho");
+    	ReqEchoMsg data = new ReqEchoMsg();
+    	data.setData("test echo");
+    	RequestMessage req = new RequestMessage();
+    	req.setId(MessageID.REQ_ECHO);
+    	req.setData(data);
+    	client.writeAndFlush(req);
+    }
     public void sendLogin(String token) throws IOException {
     	System.out.println("sendLogin");
     	RspLoginMsg data = new RspLoginMsg();
