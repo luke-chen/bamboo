@@ -3,6 +3,7 @@ package luke.bamboo.netty;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,15 +22,16 @@ import luke.bamboo.message.ResponseMessage;
  */
 public class GameServerHandler extends ChannelInboundHandlerAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(GameServerHandler.class);
-
+	private static AtomicLong activeNum = new AtomicLong();
+	
 	@Override
 	public void channelActive(final ChannelHandlerContext ctx) throws Exception {
-		logger.trace("active");
+		logger.trace("active "+activeNum.getAndIncrement());
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) {
-		logger.trace("inactive");
+		logger.trace("inactive "+activeNum.getAndDecrement());
 		try {
 			MessageHandlerEngine.getInstance().getInactiveHandler().process(null, null, ctx);
 		} catch (Exception e) {
@@ -43,7 +45,6 @@ public class GameServerHandler extends ChannelInboundHandlerAdapter {
 	 */
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) {
-		logger.trace("read");
 		try {
 			long st = System.currentTimeMillis();
 			RequestMessage req = (RequestMessage) msg;
@@ -54,7 +55,7 @@ public class GameServerHandler extends ChannelInboundHandlerAdapter {
 				ctx.writeAndFlush(resp);
 			}
 			logger.trace(
-					String.format("[finish handler] [%dms] [req:%s %s] [resp:%s %s]", System.currentTimeMillis() - st,
+					String.format("[finish handler]-[%dms]-[req:%s %s]-[resp:%s %s]", System.currentTimeMillis() - st,
 							id, req.getData(), resp.getId(), resp.getData()));
 		} catch (Exception ex) {
 			logger.error("channelRead", ex);

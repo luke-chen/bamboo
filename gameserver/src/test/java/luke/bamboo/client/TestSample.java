@@ -68,7 +68,7 @@ public class TestSample extends Thread  implements ClientParse {
 			client = new Client(this);
 			client.connection(5000, "127.0.0.1", 8610, 60*1000, true);
 			for (int i=0; i<2; i++) {
-				sendEcho();
+				sendHeartBeat();
 				Thread.sleep(30000);
 			}
 		} catch (Exception e) {
@@ -146,9 +146,7 @@ public class TestSample extends Thread  implements ClientParse {
 
     public void sendHeartBeat() throws IOException {
     	System.out.println("sendHeartBeat");
-    	RequestMessage req = new RequestMessage();
-    	req.setId(MessageID.REQ_HEART_BEAT);
-    	client.writeAndFlush(req);
+    	client.writeAndFlush(MessageID.REQ_HEART_BEAT, null);
     }
     
 //    public void sendLogin2(String token) throws IOException {
@@ -167,15 +165,6 @@ public class TestSample extends Thread  implements ClientParse {
 //        net.packageIt();
 //        net.flush();
 //    }
-    public void sendEcho() throws IOException {
-    	System.out.println("sendEcho");
-    	ReqEchoMsg data = new ReqEchoMsg();
-    	data.setData("test echo");
-    	RequestMessage req = new RequestMessage();
-    	req.setId(MessageID.REQ_ECHO);
-    	req.setData(data);
-    	client.writeAndFlush(req);
-    }
     public void sendLogin(String token) throws IOException {
     	System.out.println("sendLogin");
     	RspLoginMsg data = new RspLoginMsg();
@@ -189,7 +178,7 @@ public class TestSample extends Thread  implements ClientParse {
         dos.writeShort(req.getId());
         byte[] t = JsonUtil.toByteArray(req.getData());
         dos.write(t, 0, t.length);
-        client.packageIt();
+        client.encodePackage();
         client.flush();
     }
     

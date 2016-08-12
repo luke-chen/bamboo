@@ -13,16 +13,19 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import com.alibaba.fastjson.JSONObject;
+
 import luke.bamboo.common.util.JsonUtil;
 import luke.bamboo.message.RequestMessage;
 import luke.bamboo.message.ResponseMessage;
 import luke.bamboo.message.id.MessageID;
 import luke.bamboo.message.resp.RspLoginMsg;
 
-public class Client extends Thread {
+public class Client implements Runnable {
     private Socket socket;
     private InputStream is;
     private OutputStream os;
+    private boolean switcher = false;
 
     // 单个正在写的上行报文缓冲
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -43,7 +46,7 @@ public class Client extends Thread {
      * 报文解析器
      */
     private ClientParse parse;
-
+    
     /**
      * @param _ip
      * @param _port
@@ -98,7 +101,7 @@ public class Client extends Thread {
         socket.connect(socketAddr, timeout);
         is = socket.getInputStream();
         os = socket.getOutputStream();
-        this.start();
+        switcher = true;
     }
 
     /**
@@ -107,6 +110,7 @@ public class Client extends Thread {
      * @throws IOException
      */
     public void close() throws IOException {
+    	switcher = false;
         if (is != null)
             is.close();
         if (os != null)
@@ -129,7 +133,7 @@ public class Client extends Thread {
     /**
      * 包装报文
      */
-    public void packageIt() {
+    public void encodePackage() {
         byte[] content = baos.toByteArray();
         int len = (content.length - 4);
         content[0] = (byte) (len >> 24 & 0x000000FF);
@@ -138,6 +142,25 @@ public class Client extends Thread {
         content[3] = (byte) (len & 0x000000FF);
         outBuffer.add(content); // 目前只支持一次上行一条报文
         baos.reset();
+    }
+    
+    public void readAndDecodePackage() throws Exception {
+    	// 读取数据
+    	byte[] data = blockRead();
+    	DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
+    	short msgId = dis.readShort();
+    	long serverTime = dis.readLong();
+    	int off = 2+8;
+    	ResponseMessage resp = new ResponseMessage();
+    	resp.setId(msgId);
+		if (data.length > off) {
+			byte[] b = new byte[data.length - off];
+			dis.readFully(b);
+//			String json = new String(b, "utf-8");
+			resp.setData(JsonUtil.toObject(b, JSONObject.class));
+		}
+    	 // 解析数据
+        parse.parse(resp);
     }
 
     /**
@@ -156,25 +179,9 @@ public class Client extends Thread {
 
     @Override
     public void run() {
-
-        while (true) {
+        while (switcher) {
             try {
-                // 读取数据
-            	byte[] data = readOfBlock();
-            	DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
-            	short msgId = dis.readShort();
-            	long serverTime = dis.readLong();
-            	int off = 2+8;
-            	ResponseMessage resp = new ResponseMessage();
-            	resp.setId(msgId);
-				if (data.length > off) {
-					byte[] b = new byte[data.length - off];
-					dis.readFully(b);
-//					String json = new String(b, "utf-8");
-					resp.setData(JsonUtil.toObject(b, ResponseMessage.class));
-				}
-            	 // 解析数据
-                parse.parse(resp);
+            	readAndDecodePackage();
             } catch (Exception e) {
                 e.printStackTrace();
                 try {
@@ -183,12 +190,12 @@ public class Client extends Thread {
                     e1.printStackTrace();
                 }
                 // 网络出错直接退出
-                return;
+                break;
             }
         }
     }
 
-    private byte[] readOfBlock() throws IOException {
+    private byte[] blockRead() throws IOException {
         ////////////////// 读取报文长度 ///////////////////////
         int length = 0;
         int lenCount = 0;
@@ -240,37 +247,14 @@ public class Client extends Thread {
             throw new IOException("达到最大重试次数,当前读取长度=" + off + ",总长度=" + length);
         }
     }
-
-    public Socket getSocket() {
-        return socket;
-    }
     
-    public void writeAndFlush(RequestMessage req) throws IOException {
-    	System.out.println("writeAndFlush:"+JsonUtil.toJsonString(req.getData()));
+    public void writeAndFlush(short id, Object data) throws IOException {
+    	System.out.println("writeAndFlush:"+JsonUtil.toJsonString(data));
         DataOutputStream dos = getOutBuffer();
-        dos.writeShort(req.getId());
-        byte[] data = JsonUtil.toByteArray(req.getData());
-        dos.write(data, 0, data.length);
-        packageIt();
+        dos.writeShort(id);
+        byte[] buffer = JsonUtil.toByteArray(data);
+        dos.write(buffer, 0, buffer.length);
+        encodePackage();
         flush();
-        System.out.println("flush!");
     }
-
-    // public static void main(String[] str)
-    // {
-    // try
-    // {
-    // new ClientUI();
-    // // for (int i = 0; i < 1; i++)
-    // // {
-    // // Client c = new Client();
-    // // c.sleep(10);
-    // // }
-    // }
-    // catch (Exception e)
-    // {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // }
 }
