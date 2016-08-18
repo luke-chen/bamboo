@@ -1,6 +1,8 @@
 package luke.bamboo.client;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -28,8 +30,9 @@ public class TestEcho extends Thread implements ClientParse {
 
 	public void run() {
 		try {
+			System.out.println("connect ip:"+ip+" port:"+port);
 			client = new Client(this);
-			client.connection(5000, "127.0.0.1", 8610, 60 * 1000, true);
+			client.connection(5000, ip, port, 60 * 1000, true);
 			for (int i = 0; i < loopNum; i++) {
 				sendEcho();
 				client.readAndDecodePackage();
@@ -47,11 +50,11 @@ public class TestEcho extends Thread implements ClientParse {
 		t.getSpendTime();
 		short msgID = resp.getId();
 		long serverT = resp.getT();
-		System.out.println("parse msgID=" + msgID + " t:" + new Date(serverT * 1000) + "t:" + t.getAverage());
+		//System.out.println("parse msgID=" + msgID + " t:" + new Date(serverT * 1000) + "t:" + t.getAverage());
 
 		switch (msgID) {
 		case MessageID.RSP_ECHO:
-			System.out.println("echo data:" + ((JSONObject) resp.getData()).getString("data"));
+			//System.out.println("echo data:" + ((JSONObject) resp.getData()).getString("data"));
 			break;
 		case MessageID.RSP_UNKNOWN:
 			System.out.println("unknow");
@@ -66,7 +69,7 @@ public class TestEcho extends Thread implements ClientParse {
 	}
 
 	public void sendEcho() throws IOException {
-		System.out.println("sendEcho");
+		//System.out.println("sendEcho");
 		ReqEchoMsg data = new ReqEchoMsg();
 		data.setData("test echo");
 		client.writeAndFlush(MessageID.REQ_ECHO, data);
@@ -76,16 +79,20 @@ public class TestEcho extends Thread implements ClientParse {
 	static ArrayList<TimerCounter> list = new ArrayList<TimerCounter>();
 
 	public static void main(String[] str) throws Exception {
-		int clientNum = Integer.parseInt(str[0]);
-		int loopNum = Integer.parseInt(str[1]);
-		int intval = Integer.parseInt(str[2]);
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.print("input client number:");
+		int clientNum = Integer.parseInt(br.readLine().trim());
+		System.out.print("input loop number:");
+		int loopNum = Integer.parseInt(br.readLine().trim());
+		System.out.print("intval (ms):");
+		int intval = Integer.parseInt(br.readLine().trim());
 		System.out.println("clientNum:"+clientNum+" loopNum:"+loopNum);
 		ArrayList<TestEcho> tests = new ArrayList<TestEcho>();
 		for (int i = 0; i < clientNum; i++) {
 			Thread.sleep(20);
 			TimerCounter t = new TimerCounter();
 			list.add(t);
-			TestEcho test = new TestEcho("192, 168, 137, 11", 8610, t, loopNum, intval);
+			TestEcho test = new TestEcho("192.168.137.11", 8610, t, loopNum, intval);
 			test.start();
 			tests.add(test);
 		}
