@@ -43,7 +43,7 @@ public class TimerCounter {
     }
     
     public float getAverage() {
-    	return average / averageCount;
+    	return (float)average / averageCount;
     }
 
 	public long getMax() {
@@ -63,7 +63,7 @@ public class TimerCounter {
 	}
 	
 	public static void printReport(List<TimerCounter> list) {
-		long total = 0;
+		float total = 0;
 		long max = 0;
 		long min = Long.MAX_VALUE;
 		for(TimerCounter t : list) {
@@ -73,7 +73,7 @@ public class TimerCounter {
 			if(t.getMin() < min)
 				min = t.getMin();
 		}
-		System.out.println(String.format("average time: %dms, total time:%d, count: %d, max: %dms, min: %dms", total/list.size(), total, list.size()*list.get(0).getAverageCount(), max, min));
-		logger.info(String.format("average time: %dms, total time:%d, count: %d, max: %dms, min: %dms", total/list.size(), total, list.size()*list.get(0).getAverageCount(), max, min));
+		System.out.println(String.format("average time: %.2fms, total: %.2f, count: %d, max: %dms, min: %dms", total/list.size(), total, list.size()*list.get(0).getAverageCount(), max, min));
+		logger.info(String.format("average time: %.2fms, total :%.2f, count: %d, max: %dms, min: %dms", total/list.size(), total, list.size()*list.get(0).getAverageCount(), max, min));
 	}
 }
