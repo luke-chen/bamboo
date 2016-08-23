@@ -6,6 +6,7 @@ import luke.bamboo.message.ResponseMessage;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 public class GameContext {
@@ -13,6 +14,10 @@ public class GameContext {
 	private static ArrayList<GameLogicInterface> orderedServices = new ArrayList<GameLogicInterface>();
 	
 	private static ConcurrentHashMap<Long, Channel> allChannels = new ConcurrentHashMap<Long, Channel>();
+	
+	public static AtomicLong activeNum = new AtomicLong();
+	
+	public static AtomicLong onlinePlayerNum = new AtomicLong();
 	
 	public static boolean pushMessage(Long id, ResponseMessage resp) {
 		Channel channel = allChannels.get(id);

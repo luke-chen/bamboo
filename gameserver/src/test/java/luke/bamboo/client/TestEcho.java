@@ -92,7 +92,8 @@ public class TestEcho extends Thread implements ClientParse {
 			Thread.sleep(20);
 			TimerCounter t = new TimerCounter();
 			list.add(t);
-			TestEcho test = new TestEcho("192.168.137.11", 8610, t, loopNum, intval);
+//			TestEcho test = new TestEcho("192.168.137.11", 8610, t, loopNum, intval);
+			TestEcho test = new TestEcho("127.0.0.1", 8610, t, loopNum, intval);
 			test.start();
 			tests.add(test);
 		}

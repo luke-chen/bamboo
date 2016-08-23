@@ -22,16 +22,16 @@ import luke.bamboo.message.ResponseMessage;
  */
 public class GameServerHandler extends ChannelInboundHandlerAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(GameServerHandler.class);
-	private static AtomicLong activeNum = new AtomicLong();
+	
 	
 	@Override
 	public void channelActive(final ChannelHandlerContext ctx) throws Exception {
-		logger.trace("active "+activeNum.getAndIncrement());
+		logger.trace("active "+GameContext.activeNum.getAndIncrement());
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) {
-		logger.trace("inactive "+activeNum.getAndDecrement());
+		logger.trace("inactive "+GameContext.activeNum.getAndDecrement());
 		try {
 			MessageHandlerEngine.getInstance().getInactiveHandler().process(null, null, ctx);
 		} catch (Exception e) {
