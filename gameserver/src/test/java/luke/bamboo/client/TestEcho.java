@@ -3,8 +3,6 @@ package luke.bamboo.client;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -28,7 +26,7 @@ public class TestEcho extends Thread  implements ClientParse {
 		try {
 			client = new Client(this);
 			client.connection(5000, "127.0.0.1", 8610, 60*1000, true);
-			for (int i = 0; i < 1000; i++) {
+			for (int i = 0; i < 100; i++) {
 				sendEcho();
 				client.readAndDecodePackage();
 				sleep(20);
@@ -74,9 +72,9 @@ public class TestEcho extends Thread  implements ClientParse {
     public static void main(String[] str) throws Exception {
 		ArrayList<TimerCounter> list = new ArrayList<TimerCounter>();
 		ArrayList<TestEcho> tests = new ArrayList<TestEcho>();
-		final int num = 100000;
+		final int num = 100;
 		for (int i = 0; i < num; i++) {
-			Thread.sleep(20);
+			Thread.sleep(400);
 			TimerCounter t = new TimerCounter();
 			list.add(t);
 			TestEcho test = new TestEcho(new int[] { 127, 0, 0, 1 }, 8608, t);
