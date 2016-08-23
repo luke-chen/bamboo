@@ -14,6 +14,7 @@
 		<module>dataproxy</module>
 		<module>gameserver</module>
 		<module>gateserver</module>
+		<module>adminserver</module>
 	</modules>
 	<repositories>
 		<repository>

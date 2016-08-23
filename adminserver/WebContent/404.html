@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<center>
+<b>
+<h2>404 Not Found<br>
+<div id="count">Go back to homepage in 5 seconds later</div>
+</h2>
+</b>
+</center>
+<script language="JavaScript" type="text/javascript">
+var n = 5;
+function gohome() {
+    n--;
+    if(n >= 0) {
+        document.getElementById('count').innerText= "Go back to homepage in "+n+" seconds later";
+        //document.getElementById("clock").innerText= "go back homepage "+n+" seconds later";
+    }
+    else {
+        window.location.href="http://"+window.location.host+"/Backstage/";
+    }
+}
+setInterval("gohome()", 1000);
+<!-- window.setTimeout(gotoIndex, 5000); -->
+</script>
+</body>
+</html>
