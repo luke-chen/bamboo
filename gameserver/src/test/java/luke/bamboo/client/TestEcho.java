@@ -71,7 +71,7 @@ public class TestEcho extends Thread implements ClientParse {
 	public void sendEcho() throws IOException {
 		//System.out.println("sendEcho");
 		ReqEchoMsg data = new ReqEchoMsg();
-		data.setData("test echo");
+		data.setData("this is a test echo message, please ignore!");
 		client.writeAndFlush(MessageID.REQ_ECHO, data);
 		t.addStartTime();
 	}
@@ -79,6 +79,9 @@ public class TestEcho extends Thread implements ClientParse {
 	static ArrayList<TimerCounter> list = new ArrayList<TimerCounter>();
 
 	public static void main(String[] str) throws Exception {
+		String host = "192.168.137.11";
+		int port = 8610;
+		System.out.println("connect host:"+host+":"+port);
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		System.out.print("input client number:");
 		int clientNum = Integer.parseInt(br.readLine().trim());
@@ -92,8 +95,8 @@ public class TestEcho extends Thread implements ClientParse {
 			Thread.sleep(20);
 			TimerCounter t = new TimerCounter();
 			list.add(t);
-//			TestEcho test = new TestEcho("192.168.137.11", 8610, t, loopNum, intval);
-			TestEcho test = new TestEcho("127.0.0.1", 8610, t, loopNum, intval);
+			TestEcho test = new TestEcho(host, port, t, loopNum, intval);
+//			TestEcho test = new TestEcho("127.0.0.1", 8610, t, loopNum, intval);
 			test.start();
 			tests.add(test);
 		}

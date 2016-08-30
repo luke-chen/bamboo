@@ -249,7 +249,7 @@ public class Client implements Runnable {
     }
     
     public void writeAndFlush(short id, Object data) throws IOException {
-    	System.out.println("writeAndFlush:"+JsonUtil.toJsonString(data));
+//    	System.out.println("writeAndFlush:"+JsonUtil.toJsonString(data));
         DataOutputStream dos = getOutBuffer();
         dos.writeShort(id);
         byte[] buffer = JsonUtil.toByteArray(data);
